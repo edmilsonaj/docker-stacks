@@ -28,7 +28,7 @@ services:
     container_name: "registry"
     labels:
       - "traefik.enable=true"
-      - "traefik.http.middlewares.registry-auth.basicauth.users=${REGISTRY_USERS:-admin:$2y$05$LqN7U/.127T9LW/w4l3CUud/vl0bXznQ0gPWFdZ89aCHjtxRjbS3S}"
+      - "traefik.http.middlewares.registry-auth.basicauth.users=${REGISTRY_USERS:-admin:$2y$05$TQ01MQmBS.BsgoCEhENWuOB/hF3gW3GKd/JiVWMWaf3hX0Wrhin4i}"
       - "traefik.http.routers.registry.entrypoints=websecure"
       - "traefik.http.routers.registry.middlewares=registry-auth"
       - "traefik.http.routers.registry.rule=Host(`${REGISTRY_URL:-registry.example.com}`)"
