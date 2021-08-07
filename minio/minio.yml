@@ -30,8 +30,6 @@ services:
       MINIO_BROWSER_REDIRECT_URL: https://${MINIO_CONSOLE_URL:-console.example.com}
       MINIO_ROOT_USER: ${MINIO_USER:-notminioadmin}
       MINIO_ROOT_PASSWORD: ${MINIO_PASSWORD:-changeme}
-    env_file:
-      - .env
 
 networks:
   traefik-public:

@@ -34,8 +34,6 @@ services:
       - --providers.docker=true
     networks:
       - traefik-public
-    env_file:
-      - .env
 
 volumes:
   traefik-certificates:
