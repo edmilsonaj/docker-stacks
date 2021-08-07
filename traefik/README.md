@@ -17,3 +17,5 @@ Then tag the node
 After that, you can deploy Traefik:
 
 `docker stack deploy -c traefik.yml traefik`
+
+Compose file and tutorial inspired by the one on [Docker Swarm Rocks](https://dockerswarm.rocks/)
