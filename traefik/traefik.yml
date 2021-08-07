@@ -1,0 +1,43 @@
+version: '3.3'
+
+services:
+
+  traefik:
+    image: traefik:latest
+    ports:
+      - 80:80
+      - 443:443
+    deploy:
+      placement:
+        constraints:
+          - node.labels.traefik-public.traefik-public-certificates == true
+      labels:
+        - traefik.enable=false
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - traefik-certificates:/certificates
+    command:
+      - --api=false
+      # LETSENCRYPT_EMAIL = e-mail used for Let's Encrypt notifications
+      - --certificatesresolvers.letsencrypt.acme.email=${LETSENCRYPT_EMAIL:-email@example.com}
+      - --certificatesresolvers.letsencrypt.acme.storage=/certificates/acme.json
+      - --certificatesresolvers.letsencrypt.acme.tlschallenge=true
+      - --entrypoints.web.address=:80
+      - --entrypoints.web.http.redirections.entryPoint.permanent=true
+      - --entrypoints.web.http.redirections.entryPoint.scheme=https
+      - --entrypoints.web.http.redirections.entryPoint.to=websecure
+      - --entrypoints.websecure.address=:443
+      - --providers.docker.constraints=Label(`traefik.constraint-label`, `traefik-public`)
+      - --providers.docker.endpoint=unix:///var/run/docker.sock
+      - --providers.docker.exposedbydefault=false
+      - --providers.docker.swarmmode
+      - --providers.docker=true
+    networks:
+      - traefik-public
+
+volumes:
+  traefik-certificates:
+
+networks:
+  traefik-public:
+    external: true
