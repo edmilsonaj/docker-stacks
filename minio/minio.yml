@@ -12,17 +12,17 @@ services:
         - traefik.http.routers.minio.entrypoints=websecure
         - traefik.http.routers.minio.rule=Host(`${MINIO_URL:-minio.example.com}`)
         - traefik.http.routers.minio.service=minio
-        - traefik.http.routers.minio.tls.certresolver=myresolver
+        - traefik.http.routers.minio.tls.certresolver=letsencrypt
         - traefik.http.routers.minio.tls=true
         - traefik.http.services.minio.loadbalancer.server.port=9000
         - traefik.http.routers.minio-console.entrypoints=websecure
         - traefik.http.routers.minio-console.rule=Host(`${MINIO_CONSOLE_URL:-console.example.com}`)
         - traefik.http.routers.minio-console.service=minio-console
-        - traefik.http.routers.minio-console.tls.certresolver=myresolver
+        - traefik.http.routers.minio-console.tls.certresolver=letsencrypt
         - traefik.http.routers.minio-console.tls=true
         - traefik.http.services.minio-console.loadbalancer.server.port=9001
     volumes:
-      - "${MINIO_BIND:-./minio}:/data"
+      - ${MINIO_BIND:-./minio}:/data
     command: server /data --console-address ":9001"
     networks:
       - traefik-public
@@ -30,6 +30,8 @@ services:
       MINIO_BROWSER_REDIRECT_URL: https://${MINIO_CONSOLE_URL:-console.example.com}
       MINIO_ROOT_USER: ${MINIO_USER:-notminioadmin}
       MINIO_ROOT_PASSWORD: ${MINIO_PASSWORD:-changeme}
+    env_file:
+      - .env
 
 networks:
   traefik-public:
