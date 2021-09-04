@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+
+  gitea:
+    image: gitea/gitea:latest
+    deploy:
+      placement:
+        constraints:
+          - node.labels.traefik-public.traefik-public-certificates == true
+      labels:
+        - traefik.constraint-label=traefik-public
+        - traefik.docker.network=traefik-public
+        - traefik.enable=true
+        - traefik.http.routers.git-server-https.entrypoints=websecure
+        - traefik.http.routers.git-server-https.rule=Host(`${GIT_SERVER_URL:-git-server-https.example.com}`)
+        - traefik.http.routers.git-server-https.tls.certresolver=letsencrypt
+        - traefik.http.routers.git-server-https.tls=true
+        - traefik.http.services.git-server-https.loadbalancer.server.port=3000
+    volumes:
+      - gitea-data:/data
+    networks:
+      - traefik-public
+
+volumes:
+  gitea-data:
+
+networks:
+  traefik-public:
+    external: true

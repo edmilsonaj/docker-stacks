@@ -1,0 +1,53 @@
+version: "3.8"
+
+services:
+
+  registry:
+    image: "registry:2"
+    deploy:
+      labels:
+        - traefik.constraint-label=traefik-public
+        - traefik.docker.network=traefik-public
+        - traefik.enable=true
+        - traefik.http.middlewares.registry-auth.basicauth.users=${REGISTRY_USERS:-admin:$2y$05$TQ01MQmBS.BsgoCEhENWuOB/hF3gW3GKd/JiVWMWaf3hX0Wrhin4i}
+        - traefik.http.routers.registry.entrypoints=websecure
+        - traefik.http.routers.registry.middlewares=registry-auth
+        - traefik.http.routers.registry.rule=Host(`${REGISTRY_URL:-registry.example.com}`)
+        - traefik.http.routers.registry.tls.certresolver=letsencrypt
+        - traefik.http.routers.registry.tls=true
+        - traefik.http.services.registry.loadbalancer.server.port=5000
+    volumes:
+      - "registry-data:/var/lib/registry"
+      - ./registry-config.yml:/etc/docker/registry/config.yml
+    networks:
+      - traefik-public
+
+  registry-browser:
+    image: "klausmeyer/docker-registry-browser"
+    deploy:
+      labels:
+        - traefik.constraint-label=traefik-public
+        - traefik.docker.network=traefik-public
+        - traefik.enable=true
+        - traefik.http.middlewares.browser-stripprefix.stripprefix.prefixes=/browser
+        - traefik.http.routers.registry-browser.entrypoints=websecure
+        - traefik.http.routers.registry-browser.middlewares=registry-auth,browser-stripprefix
+        - traefik.http.routers.registry-browser.rule=Host(`${REGISTRY_URL:-registry.example.com}`) && PathPrefix(`/browser`)
+        - traefik.http.routers.registry-browser.tls.certresolver=letsencrypt
+        - traefik.http.routers.registry-browser.tls=true
+        - traefik.http.services.registry-browser.loadbalancer.server.port=8080
+    networks:
+      - traefik-public
+    environment:
+      DOCKER_REGISTRY_URL: "http://registry:5000"
+      ENABLE_DELETE_IMAGES: "true"
+      PUBLIC_REGISTRY_URL: "${REGISTRY_URL:-registry.example.com}"
+      RAILS_RELATIVE_URL_ROOT: "/browser"
+      SCRIPT_NAME: "/browser"
+
+volumes:
+  registry-data:
+
+networks:
+  traefik-public:
+    external: true
